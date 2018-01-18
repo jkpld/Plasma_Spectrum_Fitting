@@ -41,7 +41,7 @@ specLines.plotfit(x1, p, group_idx)
 %   background. Note that the background is specifically for the spectrum
 %   observed in our experiments using O2 surrounding the He jet, and is not
 %   necessarily general.
-groups_to_use = ~contains(specLines.names, ["N2_1PS", "Unknown_N2", "N2+""]);
+groups_to_use = ~contains(specLines.names, ["N2_1PS", "Unknown_N2", "N2+"]);
 fit_O2_background = true;
 [p, group_idx, fitter] = specLines.fit(x2,y2, groups_to_use, fit_O2_background);
 
