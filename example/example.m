@@ -32,11 +32,7 @@ ylabel('Intensity')
 ax2 = axes('Parent',gcf,'Position',[0.45,0.45,0.5,0.5],'Box','on','XGrid','on','YGrid','on','XLim',[565,800]);
 line(x1,y1,'Color',0.5*[1 1 1],'LineWidth',2,'Parent',ax2)
 specLines.plotfit(x1, p, group_idx,[],ax2)
-
 setTheme(gcf,'light')
-
-pth = 'K:\RadiationLab\Plasma_Spectrum_Fitting\';
-export_fig(fig,'-png','-r100','-nocrop',[ pth, 'fig1'])
 
 % Fit the spectra with O2, and do not include several of the N2 related
 % emission groups while fitting
@@ -75,5 +71,3 @@ line(ax.XLim,thrsh*[1,1],'LineStyle','--','Color',0.4*[1 1 1])
 xlabel('Wavelength (nm)')
 ylabel('Intensity')
 setTheme(gcf,'light')
-
-export_fig(fig,'-png','-r100','-nocrop',[ pth, 'fig2'])
