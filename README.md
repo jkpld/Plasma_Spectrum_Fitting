@@ -1,6 +1,10 @@
 # Plasma Spectrum Fitting
 Matlab classes for fitting low resolution optical emission spectrum of atmospheric pressure plasma jets
 
+_If you find this useful for your work, please cite_  
+J. Kapaldo, X. Han, S. Ptasinska. **Shielding-gas-controlled atmospheric pressure plasma jets: optical emission, oxidizing species, and the effect on cancer cells.** (In preperation)  
+_Details will follow upon publishing_
+
 ## Example usage
 <img src="https://github.com/jkpld/Plasma_Spectrum_Fitting/blob/master/example/fig1.png" width="400"> <img src="https://github.com/jkpld/Plasma_Spectrum_Fitting/blob/master/example/fig2.png" width="400">
 
