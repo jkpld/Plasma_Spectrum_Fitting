@@ -2,8 +2,7 @@
 Matlab classes for fitting low resolution optical emission spectrum of atmospheric pressure plasma jets
 
 ## Example usage
-<img src="https://github.com/jkpld/Plasma_Spectrum_Fitting/blob/master/example/fig1.png" width="200">
-<img src="https://github.com/jkpld/Plasma_Spectrum_Fitting/blob/master/example/fig2.png" width="200">
+<img src="https://github.com/jkpld/Plasma_Spectrum_Fitting/blob/master/example/fig1.png" width="400"> <img src="https://github.com/jkpld/Plasma_Spectrum_Fitting/blob/master/example/fig2.png" width="400">
 
 ```Matlab
 % Load the example SpectralLines object
