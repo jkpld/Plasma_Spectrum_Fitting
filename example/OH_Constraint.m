@@ -17,7 +17,8 @@ A = A(idx);
 mu = mu(idx);
 
 % Extract the OH peak at 308, which has a tail at longer wavelengths.
-idx2 = mu > 307 & mu < 320;
+
+idx2 = mu > 307 & mu <= 320;
 A = A(idx2);
 mu = mu(idx2);
 idx = idx(idx2);
@@ -43,7 +44,6 @@ v = [-(1-delta)*ones(1,n-1), ones(1,n-1)];
 % g = sparse(j,i,[v1,v2,v2,v1], N, max(i));
 
 g = [j(:),i(:),v(:)];
-
 
 if nargout > 4
     initCorrections = zeros(N,1);

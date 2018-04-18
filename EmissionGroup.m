@@ -30,7 +30,7 @@ classdef EmissionGroup
         removeSmallPeaks = true;
     end
     
-    properties (Hidden)
+    properties %(Hidden)
         % Additional cost : function that returns an additional cost to be
         % added to the total fitting cost. This allows for additional
         % constraints to be applied by minimization..
@@ -64,9 +64,8 @@ classdef EmissionGroup
             if nargin < 4
                 threshold = 0;
             end
-            
 
-            a0 = interp1(x,medfilt1(y,9,'truncate'),c0);
+            a0 = max(interp1(x,medfilt1(y,9,'truncate'),c0),0);
             
             if ~isempty(obj.nonLinFitConstraint)
                 try
@@ -85,13 +84,14 @@ classdef EmissionGroup
             a0(~toSmall) = obj.a0_PostProcess(a0(~toSmall));
             
             a0lb = zeros(size(c0));
-            a0ub = a0*5;
+            a0ub = max(a0*5,0.0001);
             
             % combine
             p0 = [a0(:),c0(:),s0(:)];
             p0ub = [a0ub(:),c0ub(:),s0ub(:)];
             p0lb = [a0lb(:),c0lb(:),s0lb(:)];
 
+            
             % remove small peaks
             p0(toSmall,:) = [];
             p0ub(toSmall,:) = [];

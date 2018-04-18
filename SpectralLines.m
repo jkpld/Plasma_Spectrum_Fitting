@@ -5,6 +5,10 @@ classdef SpectralLines
     properties (Dependent)
         names(1,:) string
     end
+    
+    properties (Hidden)
+        robust_spec_fit = false;
+    end
     methods
         function obj = SpectralLines()
         end
@@ -80,7 +84,7 @@ classdef SpectralLines
             end
         end
 
-        function [p,specGroupIdx,fitter] = fit(obj, x, y, groupsToInclude, fitBG, noiseLvl,p0_user)
+        function [p,specGroupIdx,fitter,noiseLvl] = fit(obj, x, y, groupsToInclude, fitBG, noiseLvl,p0_user)
 
             if nargin < 4 || isempty(groupsToInclude)
                 toInclude = 1:numel(obj.emissionGroups);
@@ -114,6 +118,7 @@ classdef SpectralLines
 %                 noiseLvl = 2*mad(ytmp(ytmp<mad(ytmp,1)),1);
                 noiseLvl = 2*mad(y(x>800 | x<220),1);
             end
+            
 %             noiseLvl
             y = y./noiseLvl;
             % Extract groups toInclude
@@ -121,6 +126,8 @@ classdef SpectralLines
 
             % Initialize SpecFitter
             fitter = SpecFitter(x,y,fitBG);
+            fitter.robust_spec_fit = obj.robust_spec_fit;
+                
 
 %             figure
 %             line(x,y)
@@ -146,20 +153,30 @@ classdef SpectralLines
                     groups(i).removeSmallPeaks = false;
                 end
                 [p0{i},p0lb{i},p0ub{i}] = groups(i).getInitialParameters(x,fitter.y-fitter.bg,threshold);
+%                 if groups(i).name == "H"
+%                     p0{i}
+%                     p0lb{i}
+%                     p0ub{i}
+%                 end
                 groupIdx{i} = toInclude(i)*ones(size(p0{i},1),1);
             end
-
+% error('some err')
             p0 = cat(1,p0{:});
             p0lb = cat(1,p0lb{:});
             p0ub = cat(1,p0ub{:});
             specGroupIdx = cat(1,groupIdx{:});
 
+            
             if p0user
-                p0 = p0_user/noiseLvl;
-                p0ub(:,1,:) = max(p0_user(:,1)*2,0.2);
-                p0lb(:,1,:) = -0.0001;
+                
+                p0_user(:,1) = p0_user(:,1)/noiseLvl;
+                p0(:,1:size(p0_user,2)) = p0_user;
+                
+                p0ub(:,1) = max(p0_user(:,1)*2,0);
+                p0lb(:,1) = -0.0001;
 
             end
+           
 
 %             [p0,p0lb,p0ub]
 %             error('some err')
@@ -179,6 +196,7 @@ classdef SpectralLines
 
             % Fit options
             options = optimoptions('fmincon',...
+                'Algorithm','interior-point',...
                 'HonorBounds',true,...
                 'OptimalityTolerance',1e-4,...
                 'ConstraintTolerance',1e-4,...
@@ -186,12 +204,13 @@ classdef SpectralLines
                 'SpecifyObjectiveGradient',true,...
                 'SpecifyConstraintGradient',true,...
                 'display','none',...
-                'MaxFunctionEvaluations',5000,...
+                'MaxFunctionEvaluations',8000,...
                 'MaxIterations',2000,...
                 'CheckGradients',false,...
                 'ScaleProblem','none');%'obj-and-constr');
 
             fitter.extraCostTerms = @(p) additionalCost(obj,p,specGroupIdx);
+%             p0(specGroupIdx==9,:)
             fun = @(p) fitter.fitSpec(p);
             p = fmincon(fun,p0,[],[],[],[],p0lb,p0ub,nonlcon,options);
 
@@ -206,6 +225,11 @@ classdef SpectralLines
             p(:,1) = p(:,1)*noiseLvl;
             fitter.y = fitter.y*noiseLvl;
             fitter.bg = fitter.bg*noiseLvl;
+            
+            try 
+                fitter.BG_knts(1) = fitter.BG_knts(1)*noiseLvl;
+            catch
+            end
         end
 
         function [c, grad] = additionalCost(obj,p,groupIdx)
@@ -236,6 +260,7 @@ classdef SpectralLines
             for i = 1:numel(groups)
                 if ~isempty(obj.emissionGroups(groups(i)).nonLinFitConstraint)
                     [c{i},ceq{i},g{i},geq{i}] = obj.emissionGroups(groups(i)).nonLinFitConstraint(p,groupIdx==groups(i));
+
 
                     if ~isempty(g{i})
                         g{i}(:,2) = g{i}(:,2) + c_idx;
@@ -297,12 +322,12 @@ classdef SpectralLines
                 g = p(i,1)*exp(-(x - p(i,2)).^2/(2*p(i,3)^2));
                 gs = gs + g;
                 valid = x-p(i,2) < 4.3*p(i,3) & x-p(i,2) > -4.3*p(i,3); %g>p(i,1)/100;
-                lh(i) = line(x(valid),g(valid)+bg(valid),'color',cols(idx(i),:),'linestyle','-','linewidth',0.5,'Parent',ax,'Tag','FitSpecLine');
+                lh(i) = line(x(valid),g(valid)+bg(valid),'color',cols(idx(i),:),'linestyle','-','linewidth',0.5,'Parent',ax,'Tag','FitSpecLineIndividual');
             end
-            line(x,gs+bg,'color','k','linestyle','-','Parent',ax,'Tag','FitSpecLine');
-            uistack(lh,'top');
+            line(x,gs+bg,'color','r','linestyle','-','Parent',ax,'Tag','FitSpecLineSum');
+%             uistack(lh,'top');
             if ~all(bg==0)
-                line(x,bg,'color','k','linewidth',2,'Parent',ax,'Tag','FitSpecLine');
+                line(x,bg,'color','k','linewidth',1,'Parent',ax,'Tag','FitSpecLineBG');
             end
         end
 

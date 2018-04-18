@@ -102,7 +102,7 @@ delta = 0.0;
 
 [d,ip] = min(abs(mu - 605.7));
 if d < 2
-    ind = find(mu < 620);
+    ind = find(mu < 620 & abs(mu-600.1)>1);
     ng = numel(ind);
     if ng>1
         v = [ones(ng-1,1), -(1+delta)*ones(ng-1,1)];
